@@ -1,88 +1,65 @@
 require("dotenv").config();
 const { Telegraf, Markup, session } = require("telegraf");
 const express = require('express');
-const axios = require("axios");
-
+const fetch = require('node-fetch');
+// const cors = require('cors');
 const app = express();
 const bodyParser = require("body-parser");
+const axios = require("axios");
+
 const port = process.env.PORT || 4040;
+const hook = process.env.WEBHOOK_URL;
 const { BOT_TOKEN, SERVER_URL } = process.env;
 
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 const URI = `/webhook/${BOT_TOKEN}`;
-const WEBHOOK_URL = `${SERVER_URL}${URI}`;
+const WEBHOOK_URL = SERVER_URL + URI;
 
 app.use(express.json());
 app.use(bodyParser.json());
-
-// Initialize the webhook
 const init = async () => {
-    try {
-        const res = await axios.get(`${TELEGRAM_API}/setWebhook?url=${WEBHOOK_URL}`);
-        console.log("Webhook set successfully:", res.data);
-    } catch (error) {
-        console.error("Error setting webhook:", error.response ? error.response.data : error.message);
-    }
+    const res = await axios.get(`${TELEGRAM_API}/setWebhook?url=${WEBHOOK_URL}`);
+    console.log(res.data);
 };
 
-app.listen(port, async () => {
-    console.log(`App is running on port ${port}`);
+app.listen(process.env.PORT || 5000, async () => {
+    console.log('app is running on port', process.env.PORT || 5000);
     await init();
 });
 
-// Initialize the bot
-const bot = new Telegraf(BOT_TOKEN);
-const web_link = "https://vanillaswap.netlify.app/";
-const picture_url = "https://example.com/sample-image.jpg"; // Replace with a real image URL
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// Start command handling
+const web_link = "https://vanillaswap.netlify.app/";
+
 bot.start((ctx) => {
     const startPayload = ctx.startPayload;
     const urlSent = `${web_link}?ref=${startPayload}`;
+    // const urlSentTwo = `${web_linkTwo}?ref=${startPayload}`;
     const user = ctx.message.from;
     const userName = user.username ? `@${user.username}` : user.first_name;
+    ctx.replyWithMarkdown(`*Hey, ${userName}! Welcome to Demo Tap App!*
 
-    // Send a photo along with the message
-    ctx.replyWithPhoto(picture_url, {
-        caption: `*Hey, ${userName}! Welcome to Demo Tap App!*`,
-        parse_mode: 'Markdown',
+Click on Play Now to start mining Ton Coin`, {
         reply_markup: {
             inline_keyboard: [
                 [{ text: "⚡️Play now!⚡️", web_app: { url: urlSent } }],
-                [{ text: "🧩 Join Our Telegram Channel 🧩", url: "https://t.me/demotest" }]
-            ]
-        }
+                [{ text: "🧩 Join Our Telegram Channel 🧩", url: "https://t.me/demotest101" }]
+                // [{ text: "Bot App Demo 2 🧩", web_app: { url: urlSentTwo } }],
+            ],
+            in: true
+        },
     });
 });
 
-// New /info command to send a picture with details
-bot.command('info', (ctx) => {
-    ctx.replyWithPhoto(picture_url, {
-        caption: `Here's some important information for you!`,
-        reply_markup: {
-            inline_keyboard: [
-                [{ text: "Learn More", url: "https://example.com/learn-more" }]
-            ]
-        }
-    });
+app.get("/", async (req, res) => {
+    res.send("Hello Get me here I work fine");
 });
 
-// Default fallback for unknown commands
-bot.on('message', (ctx) => {
-    ctx.reply("I didn't understand that command. Try /start or /info!");
-});
-
-// Handle incoming webhook updates
 app.post(URI, (req, res) => {
     bot.handleUpdate(req.body);
     res.status(200).send('Received Telegram webhook');
 });
 
-// Basic route to check if the app is running
-app.get("/", (req, res) => {
-    res.send("Hello! The bot is running.");
-});
-
 app.get('/webhook', (req, res) => {
-    res.send('Webhook is active!');
+    res.send('Hey, Bot is awake!');
 });
