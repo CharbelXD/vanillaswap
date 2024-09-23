@@ -37,7 +37,7 @@ const bot = new Telegraf(BOT_TOKEN);
 const web_link = "https://vanillaswap.netlify.app/";
 
 // Define the URL of the image you want to send
-const imageUrl = "https://github.com/CharbelXD/vanillaswap/blob/main/vanilla.jpg"; // 📌 **Replace this with your actual image URL**
+const imageUrl = ""; // 📌 **Replace this with your actual image URL**
 
 bot.start((ctx) => {
     const startPayload = ctx.startPayload;
