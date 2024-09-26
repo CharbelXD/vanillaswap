@@ -17,50 +17,42 @@ const WEBHOOK_URL = SERVER_URL + URI;
 
 app.use(express.json());
 app.use(bodyParser.json());
-
 const init = async () => {
-    try {
-        const res = await axios.get(`${TELEGRAM_API}/setWebhook?url=${WEBHOOK_URL}`);
-        console.log('Webhook set:', res.data);
-    } catch (error) {
-        console.error('Error setting webhook:', error);
-    }
+    const res = await axios.get(`${TELEGRAM_API}/setWebhook?url=${WEBHOOK_URL}`);
+    console.log(res.data);
 };
 
-app.listen(port, async () => {
-    console.log('App is running on port', port);
+app.listen(process.env.PORT || 5000, async () => {
+    console.log('app is running on port', process.env.PORT || 5000);
     await init();
 });
 
-const bot = new Telegraf(BOT_TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const web_link = "https://vanillaswap.netlify.app/";
-
-// Define the URL of the image you want to send
-const imageUrl = "https://postimg.cc/dDVZzf99"; // 📌 **Replace this with your actual image URL**
 
 bot.start((ctx) => {
     const startPayload = ctx.startPayload;
     const urlSent = `${web_link}?ref=${startPayload}`;
+    // const urlSentTwo = `${web_linkTwo}?ref=${startPayload}`;
     const user = ctx.message.from;
     const userName = user.username ? `@${user.username}` : user.first_name;
+    ctx.replyWithMarkdown(`*Hey, ${userName}! Welcome to Demo Tap App!*
 
-    // Send the image with caption and inline keyboard
-    ctx.replyWithPhoto(imageUrl, {
-        caption: `*Hey, ${userName}! Welcome to Demo Tap App!*\n\nClick on Play Now to start mining Ton Coin`,
-        parse_mode: "Markdown",
+Click on Play Now to start mining Ton Coin`, {
         reply_markup: {
             inline_keyboard: [
                 [{ text: "⚡️Play now!⚡️", web_app: { url: urlSent } }],
-                [{ text: "🧩 Join Our Telegram Channel 🧩", url: "https://t.me/vanillaswap_channel" }]
+                [{ text: "🧩 Join Our Telegram Channel 🧩", url: "https://t.me/demotest101" }]
                 // [{ text: "Bot App Demo 2 🧩", web_app: { url: urlSentTwo } }],
-            ]
-        }
+            ],
+            in: true
+        },
     });
 });
 
 app.get("/", async (req, res) => {
-    res.send("Hello! Get me here I work fine.");
+    res.send("Hello Get me here I work fine");
 });
 
 app.post(URI, (req, res) => {
